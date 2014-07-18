@@ -9,7 +9,8 @@ The variables included in this dataset are:
 
 Loading and preprocessing the data
 --------------------------------------------------------
-```{r}
+
+```r
 library(ggplot2)
 library(plyr)
 library(scales)
@@ -32,15 +33,26 @@ obs$timeinterval <-
 ```
 
 Below the summary of the data structure:
-```{r}
+
+```r
 str(obs)
+```
+
+```
+## 'data.frame':	17568 obs. of  5 variables:
+##  $ steps       : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date        : Factor w/ 61 levels "2012-10-01","2012-10-02",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ interval    : int  0 5 10 15 20 25 30 35 40 45 ...
+##  $ datetime    : POSIXct, format: "2014-07-18 00:00:00" "2014-07-18 00:05:00" ...
+##  $ timeinterval: chr  "2014-07-18 00:00:00" "2014-07-18 00:05:00" "2014-07-18 00:10:00" "2014-07-18 00:15:00" ...
 ```
 
 Mean total number of steps taken per day
 --------------------------------------------------------
 
 ### Histogram of the total number of steps taken each day
-```{r fig.width=10}
+
+```r
 # the result is a data.frame of 61 obs. of 2 variables
 # NA have not been removed yet
 d <- ddply(obs,.(date),summarize,steps=sum(steps))
@@ -55,16 +67,28 @@ p <- ggplot(d, aes(x=steps)) +
 p
 ```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
+
 ### Mean and Median values
 ***Mean*** of steps taken per day (NA are removed):
-```{r}
+
+```r
 mean(d$steps, na.rm=TRUE)
+```
+
+```
+## [1] 10766
 ```
 
 
 ***Median*** of steps taken per day (NA are removed):
-```{r}
+
+```r
 median(d$steps, na.rm=TRUE)
+```
+
+```
+## [1] 10765
 ```
 
 Average daily activity pattern
@@ -72,7 +96,8 @@ Average daily activity pattern
 
 A time series plot (i.e. geom_line) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis) has been created.
 
-```{r}
+
+```r
 # data are summarized by the time interval
 # the average is calculated
 d <- ddply(obs, .(datetime), summarize, steps=mean(steps, na.rm=TRUE))
@@ -82,12 +107,24 @@ d$timeinterval <- format(d$datetime, "%H:%M")
 ```
 
 Find below a summary of the data:
-```{r}
+
+```r
 summary(d)
 ```
 
+```
+##     datetime                       steps        timeinterval      
+##  Min.   :2014-07-18 00:00:00   Min.   :  0.00   Length:288        
+##  1st Qu.:2014-07-18 05:58:45   1st Qu.:  2.49   Class :character  
+##  Median :2014-07-18 11:57:30   Median : 34.11   Mode  :character  
+##  Mean   :2014-07-18 11:57:30   Mean   : 37.38                     
+##  3rd Qu.:2014-07-18 17:56:15   3rd Qu.: 52.83                     
+##  Max.   :2014-07-18 23:55:00   Max.   :206.17
+```
+
 ### Time series plot of 5-minute interval
-```{r fig.width=10}
+
+```r
 p <- ggplot(d, aes(x=datetime, y=steps)) +
             geom_line(colour = "darkgreen") +
             theme(axis.text.x=element_text(angle = -60, hjust = 0)) +
@@ -108,18 +145,36 @@ p <- ggplot(d, aes(x=datetime, y=steps)) +
 p
 ```
 
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
+
 
 
 ### Max number of steps in 5-minute interval
 ***"8:35 AM"*** is the 5-minute interval, on average across all the days in the dataset, containining the maximum number of steps: 
-```{r}
+
+```r
 d[d$steps==max(d$steps), c("timeinterval", "steps")]
+```
+
+```
+##     timeinterval steps
+## 104        08:35 206.2
 ```
 
 
 These are the ***Top5*** 5-minute interval, on average across all the days in the dataset, containining the maximum number of steps: 
-```{r}
+
+```r
 head(d[order(d$steps, decreasing = TRUE), c("timeinterval", "steps")], n = 5L)
+```
+
+```
+##     timeinterval steps
+## 104        08:35 206.2
+## 105        08:40 195.9
+## 107        08:50 183.4
+## 106        08:45 179.6
+## 103        08:30 177.3
 ```
 
 
@@ -129,8 +184,14 @@ Imputing missing values
 ### Total number of missing values
 
 Total number of missing values in the dataset is: ***2304***, all missing values are in the steps variable.
-```{r}
+
+```r
 colSums(is.na(obs))
+```
+
+```
+##        steps         date     interval     datetime timeinterval 
+##         2304            0            0            0            0
 ```
 
 
@@ -140,7 +201,8 @@ The imputing strategy choosen is to replace the NA values with the mean for that
 The 5-minute interval values are saved in the d data set from the previous step.
 
 ### New dataset with imputed steps
-```{r results='hide'}
+
+```r
 obscomplete <- obs
 
 # add a variable called imputed_steps to the data frame
@@ -154,15 +216,23 @@ obscomplete[is.na(obscomplete$steps), "imputed_steps"] <- d$steps
 
 The imputed_steps variable does not contain any missing values.
 The steps variable still contains the original number of NA as it has not been modified.
-```{r}
+
+```r
 # validate that the imputed_steps variable does not contain any NA
 # the steps variable still contains NA as it has not been modified
 colSums(is.na(obscomplete))
 ```
 
-### Histogram of the total number of steps taken each day (after imputing the mean for the 5-minute interval)
-```{r fig.width=10}
+```
+##         steps          date      interval      datetime  timeinterval 
+##          2304             0             0             0             0 
+## imputed_steps 
+##             0
+```
 
+### Histogram of the total number of steps taken each day (after imputing the mean for the 5-minute interval)
+
+```r
 # the result is a data.frame of 61 obs. of 2 variables
 d <- ddply(obscomplete,.(date),summarize,imputed_steps=sum(imputed_steps))
 
@@ -179,16 +249,28 @@ p <- ggplot(d, aes(x=imputed_steps)) +
 p
 ```
 
+![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14.png) 
+
 ### Mean and Median values
 ***Mean*** of steps taken per day (after imputing):
-```{r}
+
+```r
 mean(d$imputed_steps)
+```
+
+```
+## [1] 10766
 ```
 
 
 ***Median*** of steps taken per day (after imputing):
-```{r}
+
+```r
 median(d$imputed_steps)
+```
+
+```
+## [1] 10766
 ```
 
 
@@ -199,7 +281,8 @@ Differences in activity patterns between weekdays and weekends?
 
 A new factor variable (called dow) is added to the imputed dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
-```{r}
+
+```r
 # add a column containing a factor indicating if the day is a weekday or a weekend
 obscomplete$dow <- factor(as.POSIXlt(obscomplete$date)$wday %in% c(0, 6), labels=c("weekday", "weekend"))
 
@@ -215,7 +298,8 @@ d <- ddply(obscomplete, .(dow,datetime), summarize, imputed_steps=mean(imputed_s
 
 The following plot contains a time series plot (i.e. geom_line) of the 5-minute interval (x-axis) and the average number of steps taken across all weekday days or weekend days (y-axis).
 
-```{r fig.width=10}
+
+```r
 # create a plot 
 p <- ggplot(d, aes(x=datetime, y=imputed_steps)) +
             facet_grid(dow ~ .) +
@@ -231,5 +315,6 @@ p <- ggplot(d, aes(x=datetime, y=imputed_steps)) +
                                paste(format(Sys.time(), format="%Y-%m-%d"), "23:00:00", sep=" "))
                                , tz="GMT"))
 p
-            
 ```
+
+![plot of chunk unnamed-chunk-18](figure/unnamed-chunk-18.png) 
